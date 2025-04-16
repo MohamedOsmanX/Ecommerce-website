@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to E-Shop</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Custom styles -->
+    <style>
+        #loading {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+        }
+        #loading.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #004687;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-[#004687] text-white p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="index.html" class="text-xl font-bold">E-Shop</a>
+            <div class="flex items-center space-x-4">
+                <a href="products.html" class="hover:text-gray-200">Products</a>
+                <a href="cart.html" class="hover:text-gray-200">Cart</a>
+                <a href="settings.html" class="hover:text-gray-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                </a>
+                <a href="admin-products.html" class="hover:text-gray-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                </a>
+                <a href="admin-orders.html" class="hover:text-gray-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                </a>
+                <div id="auth-buttons">
+                    <a href="login.html" class="hover:text-gray-200">Login</a>
+                    <a href="register.html" class="ml-4 hover:text-gray-200">Register</a>
+                </div>
+                <button id="logout-btn" class="hidden hover:text-gray-200">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto p-4">
+        <!-- Hero Section -->
+        <div class="text-center py-12">
+            <h1 id="welcome-message" class="text-4xl font-bold text-gray-900 mb-4">Welcome to E-Shop</h1>
+            <p class="text-xl text-gray-600 mb-8">Discover amazing products at great prices</p>
+            <a href="products.html" class="bg-[#004687] text-white px-6 py-3 rounded-lg hover:bg-blue-700">
+                Browse Products
+            </a>
+        </div>
+
+        <!-- Featured Products Section -->
+        <div class="mt-12">
+            <h2 class="text-2xl font-bold mb-6">Featured Products</h2>
+            <div id="featured-products" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <!-- Featured products will be loaded here -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Loading Spinner -->
+    <div id="loading">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/auth.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const token = localStorage.getItem('token');
+            const welcomeMessage = document.getElementById('welcome-message');
+            const adminProductsLink = document.getElementById('admin-products-link');
+            const adminOrdersLink = document.getElementById('admin-orders-link');
+            const authButtons = document.getElementById('auth-buttons');
+            const logoutButton = document.getElementById('logout-btn');
+
+            if (token) {
+                try {
+                    const response = await fetch('http://localhost:8080/users/profile', {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        const user = data.data;
+                        if (user.role === 'admin') {
+                            welcomeMessage.textContent = `Welcome to E-Shop admin, ${user.name}`;
+                            adminProductsLink.classList.remove('hidden');
+                            adminOrdersLink.classList.remove('hidden');
+                            authButtons.classList.add('hidden');
+                            logoutButton.classList.remove('hidden');
+                        } else {
+                            welcomeMessage.textContent = `Welcome to E-Shop, ${user.name}`;
+                            authButtons.classList.add('hidden');
+                            logoutButton.classList.remove('hidden');
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error fetching user profile:', error);
+                }
+            }
+        });
+    </script>
+</body>
+</html> 

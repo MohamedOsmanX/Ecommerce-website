@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Details - E-Shop</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Custom styles -->
+    <style>
+        #loading {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+        }
+        #loading.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #004687;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-[#004687] text-white p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="index.html" class="text-xl font-bold">E-Shop</a>
+            <div class="flex items-center space-x-4">
+                <a href="products.html" class="hover:text-gray-200">Products</a>
+                <a href="cart.html" class="hover:text-gray-200">Cart</a>
+                <div id="auth-buttons">
+                    <a href="login.html" class="hover:text-gray-200">Login</a>
+                    <a href="register.html" class="ml-4 hover:text-gray-200">Register</a>
+                </div>
+                <button id="logout-btn" class="hidden hover:text-gray-200">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto p-4">
+        <div id="product-container">
+            <!-- Product details will be loaded here -->
+        </div>
+    </main>
+
+    <!-- Loading Spinner -->
+    <div id="loading">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/auth.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

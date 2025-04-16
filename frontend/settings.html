@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - E-Shop</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Custom styles -->
+    <style>
+        #loading {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+        }
+        #loading.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #004687;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-[#004687] text-white p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="index.html" class="text-xl font-bold">E-Shop</a>
+            <div class="flex items-center space-x-4">
+                <a href="products.html" class="hover:text-gray-200">Products</a>
+                <a href="cart.html" class="hover:text-gray-200">Cart</a>
+                <a href="settings.html" class="hover:text-gray-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                </a>
+                <a id="admin-products-link" href="admin-products.html" class="hidden hover:text-gray-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                </a>
+                <div id="auth-buttons">
+                    <a href="login.html" class="hover:text-gray-200">Login</a>
+                    <a href="register.html" class="ml-4 hover:text-gray-200">Register</a>
+                </div>
+                <button id="logout-btn" class="hidden hover:text-gray-200">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto p-4">
+        <div class="max-w-4xl mx-auto">
+            <h1 class="text-3xl font-bold mb-8">Settings</h1>
+            
+            <!-- Tabs -->
+            <div class="border-b border-gray-200 mb-8">
+                <nav class="-mb-px flex space-x-8">
+                    <button id="profile-tab" class="border-b-2 border-[#004687] text-[#004687] py-4 px-1 text-sm font-medium">
+                        Profile
+                    </button>
+                    <button id="orders-tab" class="border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 py-4 px-1 text-sm font-medium">
+                        Order History
+                    </button>
+                </nav>
+            </div>
+
+            <!-- Profile Section -->
+            <div id="profile-section" class="space-y-6">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-xl font-semibold mb-4">Profile Information</h2>
+                    <form id="profile-form" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">First Name</label>
+                                <input type="text" id="firstName" name="firstName" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Last Name</label>
+                                <input type="text" id="lastName" name="lastName" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Email</label>
+                            <input type="email" id="email" name="email" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <button type="submit" class="bg-[#004687] text-white py-2 px-4 rounded hover:bg-blue-700">
+                                Update Profile
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-xl font-semibold mb-4">Change Password</h2>
+                    <form id="password-form" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Current Password</label>
+                            <input type="password" id="currentPassword" name="currentPassword" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">New Password</label>
+                            <input type="password" id="newPassword" name="newPassword" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Confirm New Password</label>
+                            <input type="password" id="confirmPassword" name="confirmPassword" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <button type="submit" class="bg-[#004687] text-white py-2 px-4 rounded hover:bg-blue-700">
+                                Change Password
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Order History Section -->
+            <div id="orders-section" class="hidden">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-xl font-semibold mb-4">Order History</h2>
+                    <div id="orders-list" class="space-y-4">
+                        <!-- Orders will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Loading Spinner -->
+    <div id="loading">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/auth.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check if user is authenticated
+            if (!auth.isAuthenticated()) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const loading = document.getElementById('loading');
+            const profileSection = document.getElementById('profile-section');
+            const ordersSection = document.getElementById('orders-section');
+            const profileTab = document.getElementById('profile-tab');
+            const ordersTab = document.getElementById('orders-tab');
+            const profileForm = document.getElementById('profile-form');
+            const passwordForm = document.getElementById('password-form');
+            const ordersList = document.getElementById('orders-list');
+
+            // Tab switching
+            profileTab.addEventListener('click', () => {
+                profileSection.classList.remove('hidden');
+                ordersSection.classList.add('hidden');
+                profileTab.classList.add('border-[#004687]', 'text-[#004687]');
+                profileTab.classList.remove('border-transparent', 'text-gray-500');
+                ordersTab.classList.remove('border-[#004687]', 'text-[#004687]');
+                ordersTab.classList.add('border-transparent', 'text-gray-500');
+            });
+
+            ordersTab.addEventListener('click', () => {
+                ordersSection.classList.remove('hidden');
+                profileSection.classList.add('hidden');
+                ordersTab.classList.add('border-[#004687]', 'text-[#004687]');
+                ordersTab.classList.remove('border-transparent', 'text-gray-500');
+                profileTab.classList.remove('border-[#004687]', 'text-[#004687]');
+                profileTab.classList.add('border-transparent', 'text-gray-500');
+                loadOrders();
+            });
+
+            // Load user profile
+            const loadProfile = async () => {
+                try {
+                    loading.classList.add('active');
+                    const response = await fetch('http://localhost:8080/users/profile', {
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        }
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Failed to load profile');
+                    }
+
+                    const data = await response.json();
+                    if (data.success && data.data) {
+                        document.getElementById('firstName').value = data.data.firstName || '';
+                        document.getElementById('lastName').value = data.data.lastName || '';
+                        document.getElementById('email').value = data.data.email || '';
+                    }
+                } catch (error) {
+                    console.error('Error loading profile:', error);
+                    alert('Failed to load profile information');
+                } finally {
+                    loading.classList.remove('active');
+                }
+            };
+
+            // Load orders
+            const loadOrders = async () => {
+                try {
+                    loading.classList.add('active');
+                    const response = await fetch('http://localhost:8080/orders', {
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        }
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Failed to load orders');
+                    }
+
+                    const data = await response.json();
+                    if (data.success && data.data) {
+                        ordersList.innerHTML = data.data.map(order => {
+                            const total = parseFloat(order.total);
+                            return `
+                                <div class="border rounded-lg p-4">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <h3 class="font-semibold">Order #${order.id}</h3>
+                                            <p class="text-sm text-gray-600">${new Date(order.created_at).toLocaleDateString()}</p>
+                                            <p class="text-sm text-gray-600">Status: ${order.status}</p>
+                                        </div>
+                                        <div class="text-right">
+                                            <p class="font-semibold">$${total.toFixed(2)}</p>
+                                            <a href="order-success.html?id=${order.id}" class="text-[#004687] hover:underline text-sm">View Details</a>
+                                        </div>
+                                    </div>
+                                    <div class="mt-2">
+                                        ${order.order_items.map(item => `
+                                            <div class="flex justify-between text-sm">
+                                                <span>${item.products.name} x ${item.quantity}</span>
+                                                <span>$${(parseFloat(item.price) * item.quantity).toFixed(2)}</span>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            `;
+                        }).join('') || '<p class="text-gray-600">No orders found</p>';
+                    }
+                } catch (error) {
+                    console.error('Error loading orders:', error);
+                    ordersList.innerHTML = '<p class="text-red-500">Failed to load orders</p>';
+                } finally {
+                    loading.classList.remove('active');
+                }
+            };
+
+            // Handle profile update
+            profileForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const formData = new FormData(profileForm);
+
+                try {
+                    loading.classList.add('active');
+                    const response = await fetch('http://localhost:8080/users/profile', {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        },
+                        body: JSON.stringify({
+                            firstName: formData.get('firstName'),
+                            lastName: formData.get('lastName'),
+                            email: formData.get('email')
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Failed to update profile');
+                    }
+
+                    alert('Profile updated successfully');
+                } catch (error) {
+                    console.error('Error updating profile:', error);
+                    alert('Failed to update profile');
+                } finally {
+                    loading.classList.remove('active');
+                }
+            });
+
+            // Handle password change
+            passwordForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const formData = new FormData(passwordForm);
+
+                if (formData.get('newPassword') !== formData.get('confirmPassword')) {
+                    alert('New passwords do not match');
+                    return;
+                }
+
+                try {
+                    loading.classList.add('active');
+                    const response = await fetch('http://localhost:8080/users/change-password', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        },
+                        body: JSON.stringify({
+                            currentPassword: formData.get('currentPassword'),
+                            newPassword: formData.get('newPassword')
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Failed to change password');
+                    }
+
+                    alert('Password changed successfully');
+                    passwordForm.reset();
+                } catch (error) {
+                    console.error('Error changing password:', error);
+                    alert('Failed to change password');
+                } finally {
+                    loading.classList.remove('active');
+                }
+            });
+
+            // Load initial data
+            loadProfile();
+        });
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (auth.isAuthenticated()) {
+                try {
+                    const response = await fetch('http://localhost:8080/users/profile', {
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        }
+                    });
+
+                    const data = await response.json();
+                    if (data.success && data.data && data.data.role === 'admin') {
+                        document.getElementById('admin-products-link').classList.remove('hidden');
+                    }
+                } catch (error) {
+                    console.error('Error loading user profile:', error);
+                }
+            }
+        });
+    </script>
+</body>
+</html> 

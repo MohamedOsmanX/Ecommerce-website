@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Orders - E-Shop</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Custom styles -->
+    <style>
+        #loading {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+        }
+        #loading.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #004687;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-[#004687] text-white p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="index.html" class="text-xl font-bold">E-Shop</a>
+            <div class="flex items-center space-x-4">
+                <a href="products.html" class="hover:text-gray-200">Products</a>
+                <a href="cart.html" class="hover:text-gray-200">Cart</a>
+                <a href="settings.html" class="hover:text-gray-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                </a>
+                <a href="admin-products.html" class="hover:text-gray-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                </a>
+                <div id="auth-buttons">
+                    <a href="login.html" class="hover:text-gray-200">Login</a>
+                    <a href="register.html" class="ml-4 hover:text-gray-200">Register</a>
+                </div>
+                <button id="logout-btn" class="hidden hover:text-gray-200">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto p-4">
+        <h1 class="text-3xl font-bold mb-6">Manage Orders</h1>
+
+        <!-- Orders Table -->
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="orders-table-body" class="bg-white divide-y divide-gray-200">
+                    <!-- Orders will be loaded here -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Status Update Modal -->
+        <div id="status-modal" class="fixed inset-0 bg-gray-500 bg-opacity-75 hidden">
+            <div class="fixed inset-0 flex items-center justify-center">
+                <div class="bg-white rounded-lg p-6 w-full max-w-md">
+                    <h2 class="text-2xl font-bold mb-4">Update Order Status</h2>
+                    <form id="status-form" class="space-y-4">
+                        <input type="hidden" id="order-id">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Status</label>
+                            <select id="order-status" required
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                <option value="pending">Pending</option>
+                                <option value="processing">Processing</option>
+                                <option value="shipped">Shipped</option>
+                                <option value="delivered">Delivered</option>
+                                <option value="cancelled">Cancelled</option>
+                            </select>
+                        </div>
+                        <div class="flex justify-end space-x-4">
+                            <button type="button" id="cancel-status-btn"
+                                class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                                Cancel
+                            </button>
+                            <button type="submit"
+                                class="px-4 py-2 bg-[#004687] text-white rounded-md hover:bg-blue-700">
+                                Update
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Loading Spinner -->
+    <div id="loading">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/auth.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Check if user is authenticated and is admin
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost:8080/users/profile', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const data = await response.json();
+                if (!data.success || data.data.role !== 'admin') {
+                    window.location.href = 'index.html';
+                    return;
+                }
+
+                // Hide auth buttons and show logout
+                document.getElementById('auth-buttons').classList.add('hidden');
+                document.getElementById('logout-btn').classList.remove('hidden');
+            } catch (error) {
+                console.error('Error checking user role:', error);
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const statusModal = document.getElementById('status-modal');
+            const cancelStatusBtn = document.getElementById('cancel-status-btn');
+            const statusForm = document.getElementById('status-form');
+            const ordersTableBody = document.getElementById('orders-table-body');
+            const loading = document.getElementById('loading');
+
+            // Load orders
+            const loadOrders = async () => {
+                try {
+                    loading.classList.add('active');
+                    console.log('Loading orders...');
+                    const response = await api.getAllOrders();
+                    console.log('Received response:', response);
+                    
+                    if (!response.success || !response.data) {
+                        throw new Error('Invalid response format');
+                    }
+
+                    const orders = response.data;
+                    console.log('Processing orders:', orders);
+
+                    if (!Array.isArray(orders)) {
+                        throw new Error('Orders data is not an array');
+                    }
+
+                    ordersTableBody.innerHTML = orders.map(order => {
+                        console.log('Processing order:', order);
+                        const total = parseFloat(order.total);
+                        return `
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">#${order.id}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900">${order.users?.name || 'N/A'}</div>
+                                    <div class="text-sm text-gray-500">${order.users?.email || 'N/A'}</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    ${new Date(order.created_at).toLocaleDateString()}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    $${total.toFixed(2)}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                        ${order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
+                                          order.status === 'processing' ? 'bg-blue-100 text-blue-800' : 
+                                          order.status === 'shipped' ? 'bg-purple-100 text-purple-800' : 
+                                          order.status === 'delivered' ? 'bg-green-100 text-green-800' : 
+                                          'bg-red-100 text-red-800'}">
+                                        ${order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <button onclick="updateOrderStatus('${order.id}')" class="text-[#004687] hover:text-blue-700">
+                                        Update Status
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    }).join('');
+                } catch (error) {
+                    console.error('Error loading orders:', error);
+                    ordersTableBody.innerHTML = `
+                        <tr>
+                            <td colspan="6" class="px-6 py-4 text-center text-red-500">
+                                Failed to load orders: ${error.message}
+                            </td>
+                        </tr>
+                    `;
+                } finally {
+                    loading.classList.remove('active');
+                }
+            };
+
+            // Show status modal
+            window.updateOrderStatus = (id) => {
+                document.getElementById('order-id').value = id;
+                statusModal.classList.remove('hidden');
+            };
+
+            // Hide status modal
+            cancelStatusBtn.addEventListener('click', () => {
+                statusModal.classList.add('hidden');
+            });
+
+            // Handle status update
+            statusForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const orderId = document.getElementById('order-id').value;
+                const status = document.getElementById('order-status').value;
+
+                try {
+                    loading.classList.add('active');
+                    const response = await fetch(`http://localhost:8080/orders/${orderId}/status`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        },
+                        body: JSON.stringify({ status })
+                    });
+
+                    const data = await response.json();
+                    if (!response.ok) {
+                        throw new Error(data.error || 'Failed to update order status');
+                    }
+
+                    statusModal.classList.add('hidden');
+                    loadOrders();
+                } catch (error) {
+                    console.error('Error updating order status:', error);
+                    alert(error.message || 'Failed to update order status');
+                } finally {
+                    loading.classList.remove('active');
+                }
+            });
+
+            // Load initial data
+            loadOrders();
+        });
+    </script>
+</body>
+</html> 
