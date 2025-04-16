@@ -1,19 +1,17 @@
 const prisma = require("../lib/prisma");
 
-/**
- * Create a new order from cart items
- * @route POST /orders/create
- */
+
 const createOrder = async (req, res) => {
   const userId = req.user.id;
 
   try {
-    // Get user's cart items
+    // get user's cart items
     const cartItems = await prisma.cart.findMany({
       where: { userid: userId },
       include: { products: true }
     });
 
+    // check if cart is empty
     if (cartItems.length === 0) {
       return res.status(400).json({
         success: false,
@@ -21,14 +19,14 @@ const createOrder = async (req, res) => {
       });
     }
 
-    // Calculate total amount
+    // calculate total amount
     const total = cartItems.reduce((sum, item) => {
       return sum + (item.products.price * item.quantity);
     }, 0);
 
-    // Create order and order items in a transaction
+    // create order and order items in a transaction
     const order = await prisma.$transaction(async (prisma) => {
-      // Create the order
+      // create the order
       const newOrder = await prisma.orders.create({
         data: {
           user_id: userId,
@@ -51,7 +49,7 @@ const createOrder = async (req, res) => {
         }
       });
 
-      // Update product stock
+      // update product stock
       for (const item of cartItems) {
         await prisma.products.update({
           where: { id: item.productid },
@@ -72,7 +70,6 @@ const createOrder = async (req, res) => {
       data: order
     });
   } catch (error) {
-    console.error('Create order error:', error);
     res.status(500).json({
       success: false,
       error: "Failed to create order",
@@ -81,10 +78,9 @@ const createOrder = async (req, res) => {
   }
 };
 
-// Get all orders (admin only)
+// Get all orders (admin only)  
 const getAllOrders = async (req, res) => {
   try {
-    console.log("Fetching all orders...");
     const orders = await prisma.orders.findMany({
       include: {
         users: {
@@ -101,13 +97,11 @@ const getAllOrders = async (req, res) => {
         },
       },
     });
-    console.log("Orders fetched successfully:", orders);
     res.json({
       success: true,
       data: orders
     });
   } catch (error) {
-    console.error("Error in getAllOrders:", error);
     res.status(500).json({ 
       success: false,
       error: "Failed to fetch orders", 
@@ -120,6 +114,7 @@ const getUserOrders = async (req, res) => {
   const userId = req.user.id;
 
   try {
+    // get user's orders
     const orders = await prisma.orders.findMany({
       where: { user_id: userId },
       include: {
@@ -139,7 +134,6 @@ const getUserOrders = async (req, res) => {
       data: orders
     });
   } catch (error) {
-    console.error('Get orders error:', error);
     res.status(500).json({
       success: false,
       error: "Failed to fetch orders",
@@ -153,6 +147,7 @@ const getOrderById = async (req, res) => {
   const userId = req.user.id;
 
   try {
+    // get order by id
     const order = await prisma.orders.findFirst({
       where: { 
         id: parseInt(id),
@@ -179,7 +174,6 @@ const getOrderById = async (req, res) => {
       data: order
     });
   } catch (error) {
-    console.error('Get order error:', error);
     res.status(500).json({
       success: false,
       error: "Failed to fetch order",
@@ -202,6 +196,7 @@ const updateOrderStatus = async (req, res) => {
   }
 
   try {
+    // update order status
     const order = await prisma.orders.update({
       where: { id: parseInt(id) },
       data: { status },
@@ -219,7 +214,6 @@ const updateOrderStatus = async (req, res) => {
       data: order
     });
   } catch (error) {
-    console.error('Update order status error:', error);
     res.status(500).json({
       success: false,
       error: "Failed to update order status",
@@ -228,15 +222,12 @@ const updateOrderStatus = async (req, res) => {
   }
 };
 
-/**
- * Cancel an order
- * @route POST /orders/:id/cancel
- */
 const cancelOrder = async (req, res) => {
   const { id } = req.params;
   const userId = req.user.id;
 
   try {
+    // get order by id
     const order = await prisma.orders.findFirst({
       where: { 
         id: parseInt(id),
@@ -248,6 +239,7 @@ const cancelOrder = async (req, res) => {
       }
     });
 
+    // check if order is found and can be cancelled
     if (!order) {
       return res.status(404).json({
         success: false,

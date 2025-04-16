@@ -1,14 +1,19 @@
 const prisma = require("../lib/prisma");
 const bcrypt = require("bcryptjs");
 
-/**
- * Get user profile
- * @route GET /users/profile
- */
 const getUserProfile = async (req, res) => {
-  const userId = req.user.id;
-
   try {
+    // Check if user is authenticated
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({
+        success: false,
+        error: "Unauthorized: User not authenticated"
+      });
+    }
+
+    const userId = req.user.id;
+
+    // Get user by id with selected fields
     const user = await prisma.users.findUnique({
       where: { id: userId },
       select: {
@@ -17,7 +22,9 @@ const getUserProfile = async (req, res) => {
         email: true,
         role: true,
         createdat: true,
-        // Exclude password for security
+        updatedat: true,
+        phone: true,
+        address: true
       }
     });
 
@@ -28,9 +35,16 @@ const getUserProfile = async (req, res) => {
       });
     }
 
+    // Format dates for better readability
+    const formattedUser = {
+      ...user,
+      createdat: user.createdat ? new Date(user.createdat).toISOString() : null,
+      updatedat: user.updatedat ? new Date(user.updatedat).toISOString() : null
+    };
+
     res.json({
       success: true,
-      data: user
+      data: formattedUser
     });
   } catch (error) {
     console.error('Get profile error:', error);
@@ -67,6 +81,7 @@ const updateUserProfile = async (req, res) => {
       }
     }
 
+    // update user by id
     const updatedUser = await prisma.users.update({
       where: { id: userId },
       data: {
@@ -146,10 +161,7 @@ const changePassword = async (req, res) => {
   }
 };
 
-/**
- * Request password reset
- * @route POST /users/forgot-password
- */
+
 const forgotPassword = async (req, res) => {
   const { email } = req.body;
 
@@ -184,7 +196,6 @@ const forgotPassword = async (req, res) => {
     res.json({
       success: true,
       message: "Password reset link sent to your email",
-      // Remove this in production
       resetToken
     });
   } catch (error) {

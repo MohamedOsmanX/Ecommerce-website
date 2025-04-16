@@ -3,7 +3,8 @@ const prisma = require("../lib/prisma");
 // Input validation middleware
 const validateCartInput = (req, res, next) => {
   const { productid, quantity } = req.body;
-  
+
+  // check if productid and quantity are present
   if (!productid || !quantity) {
     return res.status(400).json({ 
       success: false,
@@ -11,6 +12,7 @@ const validateCartInput = (req, res, next) => {
     });
   }
 
+  // check if quantity is greater than 0
   if (quantity <= 0) {
     return res.status(400).json({ 
       success: false,
@@ -18,6 +20,7 @@ const validateCartInput = (req, res, next) => {
     });
   }
 
+  // check if productid and quantity are numbers          
   if (isNaN(productid) || isNaN(quantity)) {
     return res.status(400).json({
       success: false,
@@ -29,7 +32,7 @@ const validateCartInput = (req, res, next) => {
 };
 
 const addToCart = async (req, res) => {
-  console.log('Add to cart request body:', req.body);
+
   const { productid, quantity } = req.body;
   const userid = req.user.id;
 
@@ -50,7 +53,7 @@ const addToCart = async (req, res) => {
 
     console.log('Product found:', product);
     
-    // Check if product is in stock
+    // Check if product is in stock 
     if (product.stock < quantity) {
       return res.status(400).json({
         success: false,
@@ -66,8 +69,8 @@ const addToCart = async (req, res) => {
       }
     });
 
+    // check if item already exists in cart
     if (existingItem) {
-      console.log('Item exists in cart, updating quantity');
       const newQuantity = existingItem.quantity + quantity;
       if (newQuantity > product.stock) {
         return res.status(400).json({
@@ -76,6 +79,7 @@ const addToCart = async (req, res) => {
         });
       }
 
+      // update item quantity
       const updatedItem = await prisma.cart.update({
         where: { id: existingItem.id },
         data: { quantity: newQuantity },
@@ -87,7 +91,7 @@ const addToCart = async (req, res) => {
       });
     }
 
-    console.log('Creating new cart item');
+    // create item in cart
     const cartItem = await prisma.cart.create({
       data: { 
         userid: userid,
@@ -114,6 +118,7 @@ const addToCart = async (req, res) => {
 const getUserCart = async (req, res) => {
   const userId = req.user.id;
   try {
+    // get user cart
     const carts = await prisma.cart.findMany({
       where: { userid: userId },
       include: { 
@@ -121,7 +126,7 @@ const getUserCart = async (req, res) => {
       },
     });
 
-    // Calculate total price for each item
+    // calculate total price for each item
     const cartWithTotals = carts.map(item => ({
       ...item,
       totalPrice: item.products.price * item.quantity
@@ -154,6 +159,7 @@ const removeFromCart = async (req, res) => {
       }
     });
 
+    // check if item is in cart
     if (!cartItem) {
       return res.status(404).json({
         success: false,
@@ -161,6 +167,7 @@ const removeFromCart = async (req, res) => {
       });
     }
 
+    // remove item from cart
     await prisma.cart.delete({ 
       where: { id: parseInt(id) } 
     });
@@ -184,6 +191,7 @@ const updateCartQuantity = async (req, res) => {
   const { quantity } = req.body;
   const userId = req.user.id;
 
+  // check if quantity is valid 
   if (!quantity || quantity <= 0) {
     return res.status(400).json({
       success: false,
@@ -201,6 +209,7 @@ const updateCartQuantity = async (req, res) => {
       include: { products: true }
     });
 
+    // check if item is in cart
     if (!cartItem) {
       return res.status(404).json({
         success: false,
@@ -216,6 +225,7 @@ const updateCartQuantity = async (req, res) => {
       });
     }
 
+    // update item quantity
     const updated = await prisma.cart.update({
       where: { id: parseInt(id) },
       data: { quantity },
