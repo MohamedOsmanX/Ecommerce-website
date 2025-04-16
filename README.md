@@ -111,21 +111,3 @@ DATABASE_URL="postgresql://username:password@localhost:5432/your_database_name"
 JWT_SECRET="your_jwt_secret_key"
 PORT=8080
 ```
-
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Contact
-
-Your Name - your.email@example.com
-
-Project Link: [https://github.com/yourusername/e-shop](https://github.com/yourusername/e-shop) 
