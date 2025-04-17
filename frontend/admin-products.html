@@ -51,7 +51,17 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
                 </a>
-                <div id="auth-buttons">
+                <a id="admin-products-link" href="admin-products.html" class="hidden text-gray-200 hover:text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                </a>
+                <a id="admin-orders-link" href="admin-orders.html" class="hidden hover:text-gray-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                </a>
+                <div id="auth-buttons" class="hidden">
                     <a href="login.html" class="hover:text-gray-200">Login</a>
                     <a href="register.html" class="ml-4 hover:text-gray-200">Register</a>
                 </div>
@@ -150,8 +160,13 @@
     <script src="js/main.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
-            // Check if user is authenticated and is admin
-            if (!auth.isAuthenticated()) {
+            const token = localStorage.getItem('token');
+            const authButtons = document.getElementById('auth-buttons');
+            const logoutButton = document.getElementById('logout-btn');
+            const adminProductsLink = document.getElementById('admin-products-link');
+            const adminOrdersLink = document.getElementById('admin-orders-link');
+
+            if (!token) {
                 window.location.href = 'login.html';
                 return;
             }
@@ -159,7 +174,7 @@
             try {
                 const response = await fetch('http://localhost:8080/users/profile', {
                     headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        'Authorization': `Bearer ${token}`
                     }
                 });
 
@@ -168,6 +183,12 @@
                     window.location.href = 'index.html';
                     return;
                 }
+
+                // User is admin, show admin links and logout button
+                adminProductsLink.classList.remove('hidden');
+                adminOrdersLink.classList.remove('hidden');
+                authButtons.classList.add('hidden');
+                logoutButton.classList.remove('hidden');
             } catch (error) {
                 console.error('Error checking user role:', error);
                 window.location.href = 'index.html';

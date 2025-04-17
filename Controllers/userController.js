@@ -3,15 +3,28 @@ const bcrypt = require("bcryptjs");
 
 const getUserProfile = async (req, res) => {
   try {
+    console.log('User object from request:', req.user);
+    
     // Check if user is authenticated
     if (!req.user || !req.user.id) {
+      console.log('Authentication failed - no user or user ID');
       return res.status(401).json({
         success: false,
         error: "Unauthorized: User not authenticated"
       });
     }
 
-    const userId = req.user.id;
+    // Convert userId to integer if it's a string
+    const userId = parseInt(req.user.id);
+    console.log('Parsed user ID:', userId);
+
+    if (isNaN(userId)) {
+      console.log('Invalid user ID format:', req.user.id);
+      return res.status(400).json({
+        success: false,
+        error: "Invalid user ID format"
+      });
+    }
 
     // Get user by id with selected fields
     const user = await prisma.users.findUnique({
@@ -21,12 +34,14 @@ const getUserProfile = async (req, res) => {
         name: true,
         email: true,
         role: true,
-        createdat: true,
-        updatedat: true,
-        phone: true,
-        address: true
+        createdat: true
       }
+    }).catch(error => {
+      console.error('Database query error:', error);
+      throw error;
     });
+
+    console.log('Database query result:', user ? 'User found' : 'User not found');
 
     if (!user) {
       return res.status(404).json({
@@ -38,16 +53,23 @@ const getUserProfile = async (req, res) => {
     // Format dates for better readability
     const formattedUser = {
       ...user,
-      createdat: user.createdat ? new Date(user.createdat).toISOString() : null,
-      updatedat: user.updatedat ? new Date(user.updatedat).toISOString() : null
+      createdat: user.createdat ? new Date(user.createdat).toISOString() : null
     };
+
+    console.log('Formatted user data:', formattedUser);
 
     res.json({
       success: true,
       data: formattedUser
     });
   } catch (error) {
-    console.error('Get profile error:', error);
+    console.error('Get profile error details:', {
+      error: error.message,
+      stack: error.stack,
+      userId: req.user?.id,
+      errorType: error.constructor.name
+    });
+    
     res.status(500).json({
       success: false,
       error: "Failed to fetch profile",

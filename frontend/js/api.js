@@ -35,9 +35,10 @@ window.api = {
 
     // Cart
     async getCart() {
+        const token = localStorage.getItem('token');
         const response = await fetch(`${this.baseUrl}/cart`, {
             headers: {
-                'Authorization': `Bearer ${auth.token}`
+                'Authorization': `Bearer ${token}`
             }
         });
         const data = await response.json();
@@ -48,11 +49,12 @@ window.api = {
     async addToCart(productId, quantity) {
         try {
             console.log('Adding to cart:', { productId, quantity });
+            const token = localStorage.getItem('token');
             const response = await fetch(`${this.baseUrl}/cart/add`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({ productid: productId, quantity })
             });
@@ -68,11 +70,12 @@ window.api = {
     },
 
     async updateCartItem(productId, quantity) {
+        const token = localStorage.getItem('token');
         const response = await fetch(`${this.baseUrl}/cart/${productId}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${auth.token}`
+                'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify({ quantity })
         });
@@ -82,10 +85,11 @@ window.api = {
     },
 
     async removeFromCart(productId) {
+        const token = localStorage.getItem('token');
         const response = await fetch(`${this.baseUrl}/cart/${productId}`, {
             method: 'DELETE',
             headers: {
-                'Authorization': `Bearer ${auth.token}`
+                'Authorization': `Bearer ${token}`
             }
         });
         const data = await response.json();
@@ -95,11 +99,12 @@ window.api = {
 
     // Orders
     async createOrder(orderData) {
+        const token = localStorage.getItem('token');
         const response = await fetch(`${this.baseUrl}/orders`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${auth.token}`
+                'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify(orderData)
         });
@@ -109,9 +114,10 @@ window.api = {
     },
 
     async getOrders() {
+        const token = localStorage.getItem('token');
         const response = await fetch(`${this.baseUrl}/orders`, {
             headers: {
-                'Authorization': `Bearer ${auth.token}`
+                'Authorization': `Bearer ${token}`
             }
         });
         const data = await response.json();

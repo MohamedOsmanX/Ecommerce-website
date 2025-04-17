@@ -155,7 +155,7 @@
     <script src="js/api.js"></script>
     <script src="js/main.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             // Check if user is authenticated
             if (!auth.isAuthenticated()) {
                 window.location.href = 'login.html';
@@ -170,6 +170,7 @@
             const profileForm = document.getElementById('profile-form');
             const passwordForm = document.getElementById('password-form');
             const ordersList = document.getElementById('orders-list');
+            const adminProductsLink = document.getElementById('admin-products-link');
 
             // Tab switching
             profileTab.addEventListener('click', () => {
@@ -195,25 +196,40 @@
             const loadProfile = async () => {
                 try {
                     loading.classList.add('active');
+                    const token = localStorage.getItem('token');
+                    
+                    if (!token) {
+                        throw new Error('No authentication token found');
+                    }
+
                     const response = await fetch('http://localhost:8080/users/profile', {
                         headers: {
-                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                            'Authorization': `Bearer ${token}`
                         }
                     });
 
                     if (!response.ok) {
-                        throw new Error('Failed to load profile');
+                        const errorData = await response.json().catch(() => ({}));
+                        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
                     }
 
                     const data = await response.json();
                     if (data.success && data.data) {
-                        document.getElementById('firstName').value = data.data.firstName || '';
-                        document.getElementById('lastName').value = data.data.lastName || '';
+                        // Update form fields
+                        document.getElementById('firstName').value = data.data.name?.split(' ')[0] || '';
+                        document.getElementById('lastName').value = data.data.name?.split(' ')[1] || '';
                         document.getElementById('email').value = data.data.email || '';
+                        
+                        // Show admin link if user is admin
+                        if (data.data.role === 'admin') {
+                            adminProductsLink.classList.remove('hidden');
+                        }
+                    } else {
+                        throw new Error('Invalid response format');
                     }
                 } catch (error) {
                     console.error('Error loading profile:', error);
-                    alert('Failed to load profile information');
+                    alert(`Failed to load profile: ${error.message}`);
                 } finally {
                     loading.classList.remove('active');
                 }
@@ -343,25 +359,6 @@
 
             // Load initial data
             loadProfile();
-        });
-
-        document.addEventListener('DOMContentLoaded', async () => {
-            if (auth.isAuthenticated()) {
-                try {
-                    const response = await fetch('http://localhost:8080/users/profile', {
-                        headers: {
-                            'Authorization': `Bearer ${localStorage.getItem('token')}`
-                        }
-                    });
-
-                    const data = await response.json();
-                    if (data.success && data.data && data.data.role === 'admin') {
-                        document.getElementById('admin-products-link').classList.remove('hidden');
-                    }
-                } catch (error) {
-                    console.error('Error loading user profile:', error);
-                }
-            }
         });
     </script>
 </body>

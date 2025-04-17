@@ -40,44 +40,77 @@ const loginUser = async (req, res) => {
 
   // Check if required fields are present
   if (!email || !password) {
-    return res.status(400).json({ error: "All fields are required" });
+    return res.status(400).json({
+      success: false,
+      error: "All fields are required"
+    });
   }
 
-  // find user
-  const user = await prisma.users.findUnique({
-    where: { email },
-    select: {
-      id: true,
-      email: true,
-      password: true,
-      role: true,
-      createdat: true
+  try {
+    // find user
+    const user = await prisma.users.findUnique({
+      where: { email },
+      select: {
+        id: true,
+        email: true,
+        password: true,
+        role: true,
+        name: true,
+        createdat: true
+      }
+    });
+
+    // If no user is found
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        error: "Invalid email or password"
+      });
     }
-  });
 
-  // If no user is found
-  if (!user) {
-    return res.status(400).json({ error: "User not found" });
+    // Compare password
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({
+        success: false,
+        error: "Invalid email or password"
+      });
+    }
+
+    // Generate JWT token with numeric ID
+    const token = jwt.sign(
+      {
+        id: Number(user.id),
+        email: user.email,
+        role: user.role,
+        name: user.name
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    // Success response
+    res.json({
+      success: true,
+      message: "Login successful",
+      data: {
+        token,
+        user: {
+          id: user.id,
+          email: user.email,
+          role: user.role,
+          name: user.name
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({
+      success: false,
+      error: "Login failed",
+      details: error.message
+    });
   }
-
-  // Compare password
-  const isMatch = await bcrypt.compare(password, user.password);
-  if (!isMatch) {
-    return res.status(400).json({ error: "Invalid password" });
-  }
-
-  // Generate JWT token
-  const token = jwt.sign(
-    { id: user.id, email: user.email, role: user.role },
-    process.env.JWT_SECRET, 
-    { expiresIn: "1h" }
-  );
-
-  // Success response
-  res.json({
-    message: "Login successful",
-    token,
-  });
 };
 
 module.exports = { registerUser, loginUser };
